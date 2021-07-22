@@ -3,7 +3,7 @@ Sobald ihr den ESP flashed, gibt es kein zurück auf den Ursprungszustand, auße
 Ich übernehme keine Haftung für irgendwas ;)
 Bitte entfernt für das Testen die drei LiPo Batterien!
 
-!! Es gibt keine Garantie dass alle Sensoren in Tasmota implementiert werden können !! 
+!! Es gibt keine Garantie dass alle Sensoren in Tasmota implementiert werden können !!
 
 PIN-Layout ESP32-WROOM-32X
 https://tasmota.github.io/docs/Pinouts/#esp32-wroom-32x
@@ -13,7 +13,7 @@ Damit könnt ihr immer die neuste tasmota Version kompilieren.
 
 ## Was funktioniert?
 - [Tasmota](https://github.com/arendst/Tasmota) und alle seinen Funktionen :)
-- LED Steurung (Rot,Grün,Blau) [Sichtbar am PIR Sensor] 
+- LED Steurung (Rot,Grün,Blau) [Sichtbar am PIR Sensor]
 - Der Reset-Knopf für beliebige Funktion
 - Temperatur & Luftfeuchtigkeitssensor
 - Piezo per PWM ansteuerbar
@@ -35,7 +35,7 @@ Damit könnt ihr immer die neuste tasmota Version kompilieren.
 - Ring entfernen
 
 
-## Update  
+## Update
 Wenn ihr einmal geflashed habt und das Webinterface von Tasmota erreichbar ist könnt ihr die Binary hier im Repo über das Webinterface -> Firmware Update hochladen.
 
 
