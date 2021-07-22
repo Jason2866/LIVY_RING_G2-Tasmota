@@ -205,9 +205,9 @@ void lc709203fDetect(void)
 #ifdef ESP32
   for (uint8_t checkbus = 0; checkbus < MAX_I2C; checkbus++) {
     if (I2cSetDevice(LC709203F_ADDRESS,checkbus)) { 
-      bus = checkbus;
+      lc709203f_bus = checkbus;
       if (lc709203fSetCalibration()) {
-        I2cSetActiveFound(LC709203F_ADDRESS, "LC709203F", bus);
+        I2cSetActiveFound(LC709203F_ADDRESS, "LC709203F", lc709203f_bus);
         lc709203f_found = true;
         return;
       }
