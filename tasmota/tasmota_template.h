@@ -792,7 +792,7 @@ const uint16_t kGpioNiceList[] PROGMEM = {
 \*-------------------------------------------------------------------------------------------*/
 
 #ifdef USE_PYQ1548
-AGPIO(GPIO_PYQ_PIR_DL), 
+AGPIO(GPIO_PYQ_PIR_DL),
 AGPIO(GPIO_PYQ_PIR_SER),
 #endif
 #ifdef USE_MGC3130
