@@ -43,10 +43,18 @@ static void m_solidify_bvalue(bvm *vm, bvalue * value)
         logfmt("be_const_bool(%i)", var_tobool(value));
         break;
     case BE_INT:
+#if BE_INTGER_TYPE == 2
+        logfmt("be_const_int(%lli)", var_toint(value));
+#else
         logfmt("be_const_int(%i)", var_toint(value));
+#endif
         break;
     case BE_INDEX:
+#if BE_INTGER_TYPE == 2
+        logfmt("be_const_index(%lli)", var_toint(value));
+#else
         logfmt("be_const_index(%i)", var_toint(value));
+#endif
         break;
     case BE_REAL:
 #if BE_USE_SINGLE_FLOAT
@@ -102,13 +110,15 @@ static void m_solidify_proto(bvm *vm, bproto *pr, const char * func_name, int bu
 
     logfmt("%*s%d,                          /* has sup protos */\n", indent, "", (pr->nproto > 0) ? 1 : 0);
     if (pr->nproto > 0) {
+        logfmt("%*s( &(const struct bproto*[%2d]) {\n", indent, "", pr->nproto);
         for (int32_t i = 0; i < pr->nproto; i++) {
             size_t sub_len = strlen(func_name) + 10;
             char sub_name[sub_len];
             snprintf(sub_name, sizeof(sub_name), "%s_%d", func_name, i);
-            m_solidify_proto(vm, pr->ptab[i], sub_name, builtins, indent);
+            m_solidify_proto(vm, pr->ptab[i], sub_name, builtins, indent+2);
             logfmt(",\n");
         }
+        logfmt("%*s}),\n", indent, "");
     } else {
         logfmt("%*sNULL,                       /* no sub protos */\n", indent, "");
     }
@@ -119,7 +129,7 @@ static void m_solidify_proto(bvm *vm, bproto *pr, const char * func_name, int bu
         for (int k = 0; k < pr->nconst; k++) {
             logfmt("%*s  ", indent, "");
             m_solidify_bvalue(vm, &pr->ktab[k]);
-            logfmt(",\n");
+            logfmt(",    /* R%d - K%d */\n", 256+k, k);
         }
         logfmt("%*s}),\n", indent, "");
     } else {
@@ -199,11 +209,14 @@ static void m_solidify_class(bvm *vm, bclass *cl, int builtins)
     logfmt("** Solidified class: %s\n", class_name);
     logfmt("********************************************************************/\n");
 
+    if (cl->super) {
+        logfmt("extern const bclass be_class_%s;\n", str(cl->super->name));
+    }
 
     logfmt("be_local_class(%s,\n", class_name);
     logfmt("    %i,\n", cl->nvar);
     if (cl->super) {
-        logfmt("    &be_%s_class,\n", str(cl->super->name));
+        logfmt("    &be_class_%s,\n", str(cl->super->name));
     } else {
         logfmt("    NULL,\n");
     }
@@ -239,7 +252,7 @@ static void m_solidify_class(bvm *vm, bclass *cl, int builtins)
     logfmt("/*******************************************************************/\n\n");
 
     logfmt("void be_load_%s_class(bvm *vm) {\n", class_name);
-    logfmt("    be_pushntvclass(vm, &be_%s_class);\n", class_name);
+    logfmt("    be_pushntvclass(vm, &be_class_%s);\n", class_name);
     logfmt("    be_setglobal(vm, \"%s\");\n", class_name);
     logfmt("    be_pop(vm, 1);\n");
     logfmt("}\n");
