@@ -59,7 +59,7 @@
 //#define FALLBACK_MODULE        WEMOS             // [Module2] Select default module on fast reboot where USER_MODULE is user template
 //#define USER_TEMPLATE "{\"NAME\":\"ESP32-DevKit\",\"GPIO\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,0,0,0,1,1,1,1,1,0,0,1],\"FLAG\":0,\"BASE\":1}"    // [Template] Set JSON template
 //#define USER_TEMPLATE "{\"NAME\":\"ESP32-LivyRingG2\",\"GPIO\":[1,1,1,1,226,1,1,1,608,1,640,1,227,1,1,1,0,224,225,1,0,1,1,1,0,0,0,0,161,4704,1,160,1,0,0,1],\"FLAG\":0,\"BASE\":1}"  
-#define USER_TEMPLATE "{\"NAME\":\"ESP32-LivyRingG2\",\"GPIO\":[1,1,7552,1,449,7936,0,0,609,226,641,0,288,8000,608,640,0,448,450,161,0,0,1,224,0,0,0,0,7584,257,0,160,0,0,0,0],\"FLAG\":0,\"BASE\":1}"  
+#define USER_TEMPLATE "{\"NAME\":\"ESP32-LivyRingG2\",\"GPIO\":[1,1,7552,1,449,7936,0,0,609,226,641,0,480,8000,608,640,0,448,450,161,0,0,1,224,0,0,0,0,7584,257,0,160,0,0,0,0],\"FLAG\":0,\"BASE\":1}"  
 
 
 #endif  // ESP32      
@@ -268,7 +268,7 @@
 #define APP_ENABLE_LEDLINK     false             // [SetOption31] Enable link led blinking
 
 #define APP_PULSETIME          0                 // [PulseTime] Time in 0.1 Sec to turn off power for relay 1 (0 = disabled)
-#define APP_POWERON_STATE      POWER_ALL_ON   // [PowerOnState] Power On Relay state
+#define APP_POWERON_STATE      POWER_ALL_SAVED   // [PowerOnState] Power On Relay state
                                                  //   (POWER_ALL_OFF, POWER_ALL_ON, POWER_ALL_SAVED_TOGGLE, POWER_ALL_SAVED, POWER_ALL_ALWAYS_ON, POWER_ALL_OFF_PULSETIME_ON)
 #define APP_BLINKTIME          10                // [BlinkTime] Time in 0.1 Sec to blink/toggle power for relay 1
 #define APP_BLINKCOUNT         10                // [BlinkCount] Number of blinks (0 = 32000)
