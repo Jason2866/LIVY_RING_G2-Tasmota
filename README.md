@@ -1,4 +1,4 @@
-# Online-Compilierung  
+# Online-Kompilierung  
   
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/Jason2866/LIVY_RING_G2-Tasmota)
    
