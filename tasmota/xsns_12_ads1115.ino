@@ -157,6 +157,26 @@ int16_t Ads1115GetConversion(uint8_t channel)
   delay(ADS1115_CONVERSIONDELAY);
   // Read the conversion results
   uint16_t res = I2cRead16(Ads1115.address, ADS1115_REG_POINTER_CONVERT);
+  
+
+  #define USE_ADS1115_TLA2024
+
+  //############ CHANGE TT
+  res >>= 4;
+  // get sign and mask accordingly
+  if (res & (1 << 11)) {
+      // 11th bit is sign bit. if its set, set bits 15-12
+      res |= 0xF000;
+  } else {
+      // not set, clear bits 15-12
+      res &= ~0xF000;
+  }
+
+  res = map(res,0,587,0,1.91)
+  //############ CHANGE TT
+
+  #endif   //#define USE_ADS1115_TLA2024
+
   return (int16_t)res;
 }
 

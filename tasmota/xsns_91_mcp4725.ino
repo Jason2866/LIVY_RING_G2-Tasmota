@@ -36,6 +36,9 @@
 #define MCP4725_ADDRESS4                         (0x66)    // 1000000 (A0+A1=Vcc)
 
 #define MCP4725_CMD_WRITEDAC                     (0x40)
+#define MCP4725_CMD_VOLDAC                       (0x00)
+#define MCP4725_PWRDN_MASK     (0xF9)
+#define MCP4725_CMD_VOLALL     0x40
 
 
 
@@ -50,13 +53,16 @@ bool MCP4725_Detect(void)
   
 }
 
-void MCP4725_SetVoltage(uint16_t output) //0..4095
+void MCP4725_SetVoltage(uint16_t output) //0..4096
 {
-  uint8_t packet[2];
-  packet[0] = output / 16;        // Upper data bits (D11.D10.D9.D8.D7.D6.D5.D4)
-  packet[1] = (output % 16) << 4; // Lower data bits (D3.D2.D1.D0.x.x.x.x)
-  uint16_t writep= 256U*packet[1]+packet[0];
-  if (I2cWrite16(MCP4725_ADDRESS1,MCP4725_CMD_WRITEDAC,writep)){
+  uint16_t packet = 0x0000;
+  uint8_t firstB = ((output>>4) & 0xFF);  
+  uint8_t seconB = ((output<<4) & 0xF0);
+  packet = firstB;
+  packet = packet << 8;
+  packet |= seconB;
+  
+  if (I2cWrite16(MCP4725_ADDRESS1,MCP4725_CMD_VOLALL & MCP4725_PWRDN_MASK, packet)){
     AddLog(LOG_LEVEL_DEBUG,"MCP4725: SetVoltageOK V: %d", output);
   }
 }

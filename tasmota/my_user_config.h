@@ -568,6 +568,7 @@
     #define USE_VEML6070_RSET    270000          // VEML6070, Rset in Ohm used on PCB board, default 270K = 270000ohm, range for this sensor: 220K ... 1Meg
     #define USE_VEML6070_SHOW_RAW                // VEML6070, shows the raw value of UV-A
     #define USE_ADS1115                            // [I2cDriver13] Enable ADS1115 16 bit A/D converter (I2C address 0x48, 0x49, 0x4A or 0x4B) based on Adafruit ADS1x15 library (no library needed) (+0k7 code)
+    #define USE_ADS1115_TLA2024                     // [I2cDriver13] ! USE_ADS1115 Needed ! Enable TLA2024 12 bit A/D converter, same as ADS1115 with other convertion
 //  #define USE_INA219                             // [I2cDriver14] Enable INA219 (I2C address 0x40, 0x41 0x44 or 0x45) Low voltage and current sensor (+1k code)
     #define USE_LC709203F
       #define USE_LC709203F_ALARMPERCENT      20   // 0..100 Alarm Threshold to Trigger Alarm Pin || Default = 0 (deactivated)
