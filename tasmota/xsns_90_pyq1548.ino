@@ -32,20 +32,40 @@
     //see https://media.digikey.com/pdf/Data%20Sheets/Excelitas%20PDFs/PYQ1648-7052.pdf
     // | 8bit sensitivity | 4bit blind time | 2bit pulse counter | 2bit window time | 2bit operatin mode | 2bit filter source | 5bit reserved |
     //00011000 0100 01 10 10 00 10000
-#define PYQ1548_HexConf           0x00304D10
-
+#define PYQ1548_DEFAULT_CONFIG            0x00304D10
+#define PYQ1548_MUST_SET                  0x00000010
 
 bool bmove = 0;
 uint8_t coold = PYQ1548_CoolDown;
 uint16_t confwrite = PYQ1548_ReActivate;
 bool pyq1548_found = 0;
 
-void writeregval(int pin1,unsigned long regval){
+typedef union {
+  uint32_t regval;
+  struct {
+      uint32_t count_mode:1;           // bit [0]
+      uint32_t _must_set_to_0:1;       // bit [1]
+      uint32_t hpf_cut_off:1;          // bit [2]
+      uint32_t _must_set_to_2:2;       // bits [4..3]
+      uint32_t signal_source:2;        // bits [6..5]
+      uint32_t operation_mode:2;       // bits [8..7]
+      uint32_t window_time:2;          // bits [10..9]
+      uint32_t pulse_counter:2;        // bits [12..11]
+      uint32_t blind_time:4;           // bits [16..13]
+      uint32_t threshold:8;            // bits [24..17]
+  } field;
+
+} PYQ1548_Config_t;
+
+PYQ1548_Config_t PYQ1548_Config = { .regval = PYQ1548_DEFAULT_CONFIG };
+
+void writeregval(int pin1,uint32_t regval){
   int i;
   int _pin1=pin1;
   unsigned long _regval=regval;
   unsigned char nextbit;
   unsigned long regmask = 0x1000000;
+  regval |= PYQ1548_MUST_SET; // Insure that reserved2 field is set to 2
   pinMode(_pin1,OUTPUT);
   digitalWrite(_pin1,LOW);
   for(i=0; i < 25; i++) {
@@ -68,12 +88,22 @@ void writeregval(int pin1,unsigned long regval){
 
 bool PYQ1548Init(void)
 {
+  AddLog(0, PSTR("PYQ1548: regval = 0x%08X"), PYQ1548_Config.regval );
+  AddLog(0, PSTR("PYQ1548: count_mode [0] = %d"), PYQ1548_Config.field.count_mode );
+  AddLog(0, PSTR("PYQ1548: hpf cut off [2] = %d"), PYQ1548_Config.field.hpf_cut_off );
+  AddLog(0, PSTR("PYQ1548: signal source [6..5] = %d"), PYQ1548_Config.field.signal_source );
+  AddLog(0, PSTR("PYQ1548: op mode [8..7] = %d"), PYQ1548_Config.field.operation_mode );
+  AddLog(0, PSTR("PYQ1548: window time [10..9] = %d"), PYQ1548_Config.field.window_time );
+  AddLog(0, PSTR("PYQ1548: pulse counter [12..11] = %d"), PYQ1548_Config.field.pulse_counter );
+  AddLog(0, PSTR("PYQ1548: blind time [16..13] = %d"), PYQ1548_Config.field.blind_time );
+  AddLog(0, PSTR("PYQ1548: threshold [24..17] = %d"), PYQ1548_Config.field.threshold );
+
   if (PinUsed(GPIO_PYQ_PIR_DL) && PinUsed(GPIO_PYQ_PIR_SER))  // Only start, if the pins are configured
   {
     pinMode(Pin(GPIO_PYQ_PIR_SER), OUTPUT);   //Serial IN Interface
     pinMode(Pin(GPIO_PYQ_PIR_DL), INPUT);     //Direct Link Interface
 
-    writeregval(Pin(GPIO_PYQ_PIR_SER),PYQ1548_HexConf);
+    writeregval(Pin(GPIO_PYQ_PIR_SER), PYQ1548_Config.regval );
     pyq1548_found = 1;
     return true;
   } else {
@@ -91,11 +121,11 @@ void PYQ1548Reading(void) {
         MqttPublishSensor();
       }
       coold = PYQ1548_CoolDown;
-      AddLog(LOG_LEVEL_DEBUG, PSTR("PYQ: MOVEMENT!"));   
+      AddLog(LOG_LEVEL_DEBUG, PSTR("PYQ: MOVEMENT!"));
       pinMode(Pin(GPIO_PYQ_PIR_DL),OUTPUT);
       digitalWrite(Pin(GPIO_PYQ_PIR_DL),LOW);
       delayMicroseconds(100);
-      pinMode(Pin(GPIO_PYQ_PIR_DL),INPUT);        
+      pinMode(Pin(GPIO_PYQ_PIR_DL),INPUT);
     }else{
       if (bmove == 1 && coold >= 0 ) {
         coold--;
@@ -107,7 +137,7 @@ void PYQ1548Reading(void) {
     }
 
     if (confwrite <= 0){
-      writeregval(Pin(GPIO_PYQ_PIR_SER),PYQ1548_HexConf);
+      writeregval(Pin(GPIO_PYQ_PIR_SER), PYQ1548_Config.regval );
       confwrite = PYQ1548_ReActivate;
     }else{
       confwrite--;

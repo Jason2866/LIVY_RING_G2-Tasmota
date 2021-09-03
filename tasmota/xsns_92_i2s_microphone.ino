@@ -22,15 +22,15 @@
 
 /*********************************************************************************************\
  * LivyRingG2 - PDM Mikrofon Noice Detection
- * 
+ *
  * References:
  * - https://iotassistant.io/esp32/smart-door-bell-noise-meter-using-fft-esp32/
- * 
- * 
- * TODO: 
+ *
+ *
+ * TODO:
  * FFT Library location?
- * Push Request 
- * 
+ * Push Request
+ *
 \*********************************************************************************************/
 
 #define XSNS_92                   92
@@ -131,22 +131,22 @@ bool I2S_MICROInit(void)
       use_apll: false
     };
     i2s_pin_config_t pin_config = {
-      bck_io_num:   -1, // not used in PDM-Mode, CLK is over WS(SLCT) PIN  
-      ws_io_num:    Pin(GPIO_I2S_IN_SLCT),  
+      bck_io_num:   -1, // not used in PDM-Mode, CLK is over WS(SLCT) PIN
+      ws_io_num:    Pin(GPIO_I2S_IN_SLCT),
       data_out_num: -1, // not used
       data_in_num:  Pin(GPIO_I2S_IN_DATA),
     };
 
-    errtmp = i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL); 
+    errtmp = i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);
     if (errtmp != ESP_OK) {
       AddLog(LOG_LEVEL_DEBUG,"I2S-Microphone: Failed install driver! %d", errtmp);
       return false;
     }
-    #if (MIC_TIMING_SHIFT > 0) 
+    #if (MIC_TIMING_SHIFT > 0)
       // Undocumented (?!) manipulation of I2S peripheral registers
       // to fix MSB timing issues with some I2S microphones
-      REG_SET_BIT(I2S_TIMING_REG(I2S_PORT), BIT(9));   
-      REG_SET_BIT(I2S_CONF_REG(I2S_PORT), I2S_RX_MSB_SHIFT);  
+      REG_SET_BIT(I2S_TIMING_REG(I2S_PORT), BIT(9));
+      REG_SET_BIT(I2S_CONF_REG(I2S_PORT), I2S_RX_MSB_SHIFT);
     #endif
     errtmp = i2s_set_pin(I2S_PORT, &pin_config);
     if (errtmp != ESP_OK) {
@@ -184,7 +184,7 @@ void I2S_MICROEverySecond(void) {
     // calculate loudness per octave + A weighted loudness
     loudness = calculateLoudness(energy, aweighting, OCTAVES, 1.0);
     //Microphone deactivated, 81db reported show 0db instead
-    if ((int)loudness == 81 ) {    
+    if ((int)loudness == 81 ) {
       loudness = 0;
     }
     //Update Sensors if AlertDBDiff is reached
@@ -195,7 +195,7 @@ void I2S_MICROEverySecond(void) {
 }
 
 void I2S_MICROShow(bool json)
-{  
+{
   if (PinUsed(GPIO_I2S_IN_DATA) && PinUsed(GPIO_I2S_IN_SLCT)) {
     if (json) {
       ResponseAppend_P(PSTR(",\"MIC\":{\"Noise_Level (db)\": %.1f}"), loudness);
@@ -234,5 +234,5 @@ bool Xsns92(uint8_t function)
   return result;
 }
 
-#endif  // USE_PYQ1548
+#endif  // USE_I2S_MICROPHONE
 
