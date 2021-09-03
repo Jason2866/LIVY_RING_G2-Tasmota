@@ -174,11 +174,14 @@ int16_t Ads1115GetConversion(uint8_t channel)
 <<<<<<< HEAD
 =======
 
+<<<<<<< HEAD
   res = map(res,0,587,0,1.91);
 >>>>>>> b7235506835a0712356f01c52ec37905ac084cde
+=======
+>>>>>>> 263e779d77fe322ca448f38ef90c8fcdf7fb14a9
   //############ CHANGE TT
 
-  //#endif   //#define USE_ADS1115_TLA2024
+  #endif   //#define USE_ADS1115_TLA2024
 
   return (int16_t)res;
 }
