@@ -172,10 +172,9 @@ int16_t Ads1115GetConversion(uint8_t channel)
       res &= ~0xF000;
   }
 
-  res = map(res,0,587,0,1.91);
   //############ CHANGE TT
 
-  //#endif   //#define USE_ADS1115_TLA2024
+  #endif   //#define USE_ADS1115_TLA2024
 
   return (int16_t)res;
 }
