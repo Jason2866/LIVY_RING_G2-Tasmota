@@ -177,7 +177,6 @@ bool PYQ1548CommandSensor(void)
   //Let the User set the Sensitivity(Threshold) between 1..255
   if (!strcmp(ArgV(argument, 1),"SENS")) {
     uint16_t setval = atoi(ArgV(argument, 2));
-    AddLog(0, PSTR("PYQ: sensset = %d"), setval );
     if ((setval >= 1) && (setval <= 255)) {
       PYQ1548_Config.field.threshold = setval;
       serviced = true;

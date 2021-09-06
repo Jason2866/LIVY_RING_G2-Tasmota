@@ -571,7 +571,6 @@
     #define USE_ADS1115_TLA2024                     // [I2cDriver13] ! USE_ADS1115 Needed ! Enable TLA2024 12 bit A/D converter, same as ADS1115 with other convertion
 //  #define USE_INA219                             // [I2cDriver14] Enable INA219 (I2C address 0x40, 0x41 0x44 or 0x45) Low voltage and current sensor (+1k code)
     #define USE_LC709203F
-      #define USE_LC709203F_ALARMPERCENT      20   // 0..100 Alarm Threshold to Trigger Alarm Pin || Default = 0 (deactivated)
       //#define USE_LC709203F_BatteryPackSize 0x2D // 0x08=100MAH; 0x0B=200MAH; 0x10=500MAH; 0x19=1000MAH, 0x2D=2000MAH, 0x36=300MAH  || Default = 2000MAH
       //#define USE_LC709203F_BatteryProfile  0x0  // 0x0 or 0x1 see DataSheet Page 13 || Default = 0x0
       //#define USE_LC709203F_ThermistorB 0x0D34   // See DataSheet Page 9 || Default = 0x0D34

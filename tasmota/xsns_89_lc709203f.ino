@@ -60,6 +60,7 @@ bool lc709203f_found = 0;
 #ifdef ESP32
 uint8_t lc709203f_bus = -1;
 #endif
+uint8_t lc709203f_alarmperc = 20;   //0..100 Alarm Threshold to Trigger Alarm Pin || Default = 20 (deactivated)
 
 
 /*********************************************************************************************\
@@ -189,15 +190,9 @@ bool lc709203fSetCalibration()
   #else
     if (!lc709203fWriteI2C(LC709203F_CMD_THERMISTORB, 0x0D34))  return false;
   #endif
-  //Write Alarmpercent if defined
-  #ifdef USE_LC709203F_ALARMPERCENT
-    if (!lc709203fWriteI2C(LC709203F_CMD_ALARMRSOC, USE_LC709203F_ALARMPERCENT)) return false;
-  #endif
+  //Write Alarmpercent
+  if (!lc709203fWriteI2C(LC709203F_CMD_ALARMRSOC, 20)) return false;    //default 20% Alarm Trigger Threshold
   return true;      
-}
-
-bool lc709203fWakeUp(){
-
 }
 
 void lc709203fDetect(void)
@@ -257,6 +252,37 @@ void lc709203fShow(bool json)
   }
 }
 
+bool lc709203fCommandSensor(void)
+{
+  bool serviced = true;
+  uint8_t paramcount = 0;
+  if (XdrvMailbox.data_len > 0) {
+    paramcount=1;
+  } else {
+    serviced = false;
+    return serviced;
+  }
+  char argument[XdrvMailbox.data_len];
+  UpperCase(XdrvMailbox.data,XdrvMailbox.data);
+  
+  //Let the User set the Alarm Threshold in percent between 0..100    0=alarm disabled
+  if (!strcmp(ArgV(argument, 1),"PERC")) {
+    uint16_t setval = atoi(ArgV(argument, 2));
+    if ((setval >= 0) && (setval <= 100)) {
+      if (!lc709203fWriteI2C(LC709203F_CMD_ALARMRSOC, setval)) {
+        serviced = false;
+        return false;
+      }
+      serviced = true;
+      return true;
+    }else{
+      AddLog(LOG_LEVEL_ERROR, PSTR("LC709203F: Percentage not between 0 and 100!"));
+      serviced = false;
+      return false;
+    }
+  }
+  return false;
+}
 
 /*********************************************************************************************\
  * Interface
@@ -278,6 +304,11 @@ bool Xsns89(uint8_t function)
     case FUNC_JSON_APPEND:
       lc709203fShow(1);
       break;
+    case FUNC_COMMAND_SENSOR:
+      if (XSNS_89 == XdrvMailbox.index) {
+        result = lc709203fCommandSensor();
+      }
+      break;   
   #ifdef USE_WEBSERVER
       case FUNC_WEB_SENSOR:
         lc709203fShow(0);
