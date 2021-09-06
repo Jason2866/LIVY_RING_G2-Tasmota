@@ -28,7 +28,7 @@
 
 #define XSNS_90                   90
 #define PYQ1548_CoolDown          5  //Reading (seconds to display movement)
-#define PYQ1548_ReActivate        30 //Reactivate (write config) device after On/OFF using Relay
+#define PYQ1548_ReActivate        10 //Reactivate (write config) device after On/OFF using Relay
     //see https://media.digikey.com/pdf/Data%20Sheets/Excelitas%20PDFs/PYQ1648-7052.pdf
     // | 8bit sensitivity | 4bit blind time | 2bit pulse counter | 2bit window time | 2bit operatin mode | 2bit filter source | 5bit reserved |
     //00011000 0100 01 10 10 00 10000
@@ -42,17 +42,17 @@ bool pyq1548_found = 0;
 
 typedef union {
   uint32_t regval;
-  struct {
-      uint32_t count_mode:1;           // bit [0]
-      uint32_t _must_set_to_0:1;       // bit [1]
-      uint32_t hpf_cut_off:1;          // bit [2]
-      uint32_t _must_set_to_2:2;       // bits [4..3]
-      uint32_t signal_source:2;        // bits [6..5]
-      uint32_t operation_mode:2;       // bits [8..7]
-      uint32_t window_time:2;          // bits [10..9]
-      uint32_t pulse_counter:2;        // bits [12..11]
-      uint32_t blind_time:4;           // bits [16..13]
-      uint32_t threshold:8;            // bits [24..17]
+  struct {                             // bits              //range  //default   //description
+      uint32_t count_mode:1;           // bit [0]           0..1     0
+      uint32_t _must_set_to_0:1;       // bit [1]                    0
+      uint32_t hpf_cut_off:1;          // bit [2]           0..1     0
+      uint32_t _must_set_to_2:2;       // bits [4..3]                2
+      uint32_t signal_source:2;        // bits [6..5]       0..3     0
+      uint32_t operation_mode:2;       // bits [8..7]       0..3     2
+      uint32_t window_time:2;          // bits [10..9]      0..3     2
+      uint32_t pulse_counter:2;        // bits [12..11]     0..3     1           Pulses needed to fire the trigger 0=1pulse,1=2pulse,2=3pulse,3=4pulse
+      uint32_t blind_time:4;           // bits [16..13]     0...15   2           Seconds to wait after Triggered: ([Reg Val] / 2) + 0.5sec
+      uint32_t threshold:8;            // bits [24..17]     0..255   24          Sensitvity, lower = more Sensitive
   } field;
 
 } PYQ1548_Config_t;
@@ -161,6 +161,61 @@ void PYQ1548Show(bool json)
   return;
 }
 
+bool PYQ1548CommandSensor(void)
+{
+  bool serviced = true;
+  uint8_t paramcount = 0;
+  if (XdrvMailbox.data_len > 0) {
+    paramcount=1;
+  } else {
+    serviced = false;
+    return serviced;
+  }
+  char argument[XdrvMailbox.data_len];
+  UpperCase(XdrvMailbox.data,XdrvMailbox.data);
+  
+  //Let the User set the Sensitivity(Threshold) between 1..255
+  if (!strcmp(ArgV(argument, 1),"SENS")) {
+    uint16_t setval = atoi(ArgV(argument, 2));
+    AddLog(0, PSTR("PYQ: sensset = %d"), setval );
+    if ((setval >= 1) && (setval <= 255)) {
+      PYQ1548_Config.field.threshold = setval;
+      serviced = true;
+    }else{
+      AddLog(LOG_LEVEL_ERROR, PSTR("PYQ: sens out of range!"));
+      serviced = false;
+    }
+  }
+  //Let the User set the Blind-Time between 0..15
+  if (!strcmp(ArgV(argument, 1),"BLIND")) {
+    uint16_t setval = atoi(ArgV(argument, 2));
+    if ((setval >= 0) && (setval <= 15)) {
+      PYQ1548_Config.field.blind_time = setval;
+      serviced = true;
+    }else{
+      AddLog(LOG_LEVEL_ERROR, PSTR("PYQ: blind out of range!"));
+      serviced = false;
+    }
+  }
+  //Let the User set the Pulse-Counter between 0..3
+  if (!strcmp(ArgV(argument, 1),"PULSE")) {
+    uint16_t setval = atoi(ArgV(argument, 2));
+    if ((setval >= 0) && (setval <= 3)) {
+      PYQ1548_Config.field.pulse_counter = setval;
+      serviced = true;
+    }else{
+      AddLog(LOG_LEVEL_ERROR, PSTR("PYQ: pulse out of range!"));
+      serviced = false;
+    }
+  }
+  //Write Config if parameter have been set, and reset conf write timer
+  if (serviced) { 
+    writeregval(Pin(GPIO_PYQ_PIR_SER), PYQ1548_Config.regval );
+    confwrite = PYQ1548_ReActivate;
+  }
+  return false;
+}
+
 /*********************************************************************************************\
  * Interface
 \*********************************************************************************************/
@@ -179,12 +234,17 @@ bool Xsns90(uint8_t function)
     case FUNC_JSON_APPEND:
       PYQ1548Show(1);
       break;
+    case FUNC_COMMAND_SENSOR:
+      if (XSNS_90 == XdrvMailbox.index) {
+        result = PYQ1548CommandSensor();
+      }
+      break;   
 #ifdef USE_WEBSERVER
     case FUNC_WEB_SENSOR:
       PYQ1548Show(0);
       break;
 #endif  // USE_WEBSERVER
-    }
+  }
   return result;
 }
 
