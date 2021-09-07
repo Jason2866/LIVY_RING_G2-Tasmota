@@ -212,7 +212,7 @@ bool PYQ1548CommandSensor(void)
     writeregval(Pin(GPIO_PYQ_PIR_SER), PYQ1548_Config.regval );
     confwrite = PYQ1548_ReActivate;
   }
-  return false;
+  return serviced;
 }
 
 /*********************************************************************************************\
