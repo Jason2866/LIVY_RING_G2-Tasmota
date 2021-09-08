@@ -254,12 +254,12 @@ void lc709203fShow(bool json)
 
 bool lc709203fCommandSensor(void)
 {
-  bool serviced = true;
+  bool serviced = false;
   uint8_t paramcount = 0;
   if (XdrvMailbox.data_len > 0) {
     paramcount=1;
   } else {
-    serviced = false;
+    Response_P(PSTR("{\"LC709203F\":\"%s\"}"), "Command - FAILED");
     return serviced;
   }
   char argument[XdrvMailbox.data_len];
@@ -270,18 +270,17 @@ bool lc709203fCommandSensor(void)
     uint16_t setval = atoi(ArgV(argument, 2));
     if ((setval >= 0) && (setval <= 100)) {
       if (!lc709203fWriteI2C(LC709203F_CMD_ALARMRSOC, setval)) {
+        AddLog(LOG_LEVEL_ERROR, PSTR("LC709203F: i2c write failed!"));
         serviced = false;
-        return false;
       }
       serviced = true;
-      return true;
     }else{
       AddLog(LOG_LEVEL_ERROR, PSTR("LC709203F: Percentage not between 0 and 100!"));
       serviced = false;
-      return false;
     }
   }
-  return false;
+  Response_P(PSTR("{\"LC709203F\":\"%s\"}"), serviced?"Command - OK":"Command - FAILED");
+  return serviced;
 }
 
 /*********************************************************************************************\

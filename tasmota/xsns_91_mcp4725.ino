@@ -70,12 +70,12 @@ void MCP4725_SetVoltage(uint16_t output) //0..4096
 
 bool MCP4725_Command(void)
 {
-  bool serviced = true;
+  bool serviced = false;
   uint8_t paramcount = 0;
   if (XdrvMailbox.data_len > 0) {
     paramcount=1;
   } else {
-    serviced = false;
+    Response_P(PSTR("{\"MCP4725\":\"%s\"}"), "Command - FAILED");
     return serviced;
   }
   char argument[XdrvMailbox.data_len];
@@ -85,12 +85,11 @@ bool MCP4725_Command(void)
     if ((setval >= 0) && (setval <= 4095)) {
         MCP4725_SetVoltage(setval);
         serviced = true;
-        return serviced;
       }
     serviced = false;
-    return serviced;
   }
-  return false;
+  Response_P(PSTR("{\"MCP4725\":\"%s\"}"), serviced?"Command - OK":"Command - FAILED");
+  return serviced;
 }
 
 

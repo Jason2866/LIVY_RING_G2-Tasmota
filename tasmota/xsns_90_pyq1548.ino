@@ -163,12 +163,12 @@ void PYQ1548Show(bool json)
 
 bool PYQ1548CommandSensor(void)
 {
-  bool serviced = true;
+  bool serviced = false;
   uint8_t paramcount = 0;
   if (XdrvMailbox.data_len > 0) {
     paramcount=1;
   } else {
-    serviced = false;
+    Response_P(PSTR("{\"PYQ\":\"%s\"}"), "Command - FAILED");
     return serviced;
   }
   char argument[XdrvMailbox.data_len];
@@ -212,6 +212,7 @@ bool PYQ1548CommandSensor(void)
     writeregval(Pin(GPIO_PYQ_PIR_SER), PYQ1548_Config.regval );
     confwrite = PYQ1548_ReActivate;
   }
+  Response_P(PSTR("{\"PYQ\":\"%s\"}"), serviced?"Command - OK":"Command - FAILED");
   return serviced;
 }
 
@@ -236,6 +237,7 @@ bool Xsns90(uint8_t function)
     case FUNC_COMMAND_SENSOR:
       if (XSNS_90 == XdrvMailbox.index) {
         result = PYQ1548CommandSensor();
+        return true;
       }
       break;   
 #ifdef USE_WEBSERVER
