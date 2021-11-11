@@ -157,6 +157,7 @@ enum UserSelectablePins {
   GPIO_VL53L0X_XSHUT1,                 // VL53L0X_XSHUT (the max number of sensors is VL53L0X_MAX_SENSORS)- Used when connecting multiple VL53L0X
   GPIO_MAX7219CLK, GPIO_MAX7219DIN, GPIO_MAX7219CS, // MAX7219 interface
   GPIO_TFMINIPLUS_TX, GPIO_TFMINIPLUS_RX,  // TFmini Plus ToF sensor
+  GPIO_PYQ_PIR_DL, GPIO_PYQ_PIR_SER,  // PIR Sensor PYQ 1548/7660
   GPIO_ZEROCROSS,
 #ifdef ESP32
   GPIO_HALLEFFECT,
@@ -352,6 +353,7 @@ const char kSensorNames[] PROGMEM =
   D_SENSOR_VL53L0X_XSHUT "|"
   D_SENSOR_MAX7219_CLK "|" D_SENSOR_MAX7219_DIN "|" D_SENSOR_MAX7219_CS "|"
   D_SENSOR_TFMINIPLUS_TX "|" D_SENSOR_TFMINIPLUS_RX "|"
+  D_SENSOR_PYQ_PIR_DL "|" D_SENSOR_PYQ_PIR_SER "|"
   D_SENSOR_ZEROCROSS "|"
 #ifdef ESP32
   D_SENSOR_HALLEFFECT "|"
@@ -817,6 +819,11 @@ const uint16_t kGpioNiceList[] PROGMEM = {
 /*-------------------------------------------------------------------------------------------*\
  * Other sensors
 \*-------------------------------------------------------------------------------------------*/
+
+#ifdef USE_PYQ1548
+AGPIO(GPIO_PYQ_PIR_DL),
+AGPIO(GPIO_PYQ_PIR_SER),
+#endif
 
 #ifdef USE_MGC3130
   AGPIO(GPIO_MGC3130_XFER),
